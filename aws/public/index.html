@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload to S3 (AWS)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <h1>Upload to S3 (AWS)</h1>
+    <form id="uploadForm">
+        <input type="file" name="image" id="imageInput" accept="image/*" />
+        <button type="submit">Upload</button>
+    </form>
+    <div id="gallery"></div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const gallery = document.getElementById('gallery');
+
+        // Image upload
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const fileInput = document.getElementById('imageInput');
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            loadImages();
+        });
+
+        // Load images
+        async function loadImages() {
+            fetch('/images')
+                .then(response => response.json())
+                .then(images => {
+                    const container = document.getElementById('gallery');
+                    container.innerHTML = ''; // Clear the container
+                    images.forEach(image => {
+                        const img = document.createElement('img');
+                        img.src = image.url;
+                        container.appendChild(img);
+                    });
+                })
+                .catch(error => console.error('Error loading images:', error));
+        }
+
+        loadImages();
+    </script>
+</body>
+
+</html>
